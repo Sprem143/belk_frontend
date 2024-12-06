@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const db = () => {
-    mongoose.connect('mongodb://localhost:27017/belk')
+    mongoose.connect('https://brand-b-1.onrender.com/belk')
         .then(() => {
             console.log("MongoDB connected");
         })
