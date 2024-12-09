@@ -45,7 +45,7 @@ export default function Backup() {
   }
   
   const getbackup = async () => {
-    let backup = await fetch('https://brand-b-1.onrender.com/analysis/getbackup', {
+    let backup = await fetch('http://localhost:10000/analysis/getbackup', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -119,7 +119,7 @@ export default function Backup() {
   const deletebackup=async(name)=>{
 try{
   setLoading(true)
-let res= await fetch('https://brand-b-1.onrender.com/deletebackup',{
+let res= await fetch('http://localhost:10000/deletebackup',{
     method:'DELETE',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({name})

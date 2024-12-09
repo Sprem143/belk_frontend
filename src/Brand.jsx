@@ -23,7 +23,7 @@ export default function Brand() {
     })
 
     const getproductslink = async () => {
-        let data = await fetch('https://brand-b-1.onrender.com/getproducturl', {
+        let data = await fetch('http://localhost:10000/getproducturl', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
@@ -35,7 +35,7 @@ export default function Brand() {
       const fetchbrand = async () => {
         if (num > 0) {
           setLoading(true)
-          let result = await fetch('https://brand-b-1.onrender.com/fetchbrand', {
+          let result = await fetch('http://localhost:10000/fetchbrand', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url, num })
@@ -52,7 +52,7 @@ export default function Brand() {
       const scrapproduct = async () => {
         alert("Your Previous saved data will be deleted");
         setLoading(true);
-        let result = await fetch('https://brand-b-1.onrender.com/scrapproduct', {
+        let result = await fetch('http://localhost:10000/scrapproduct', {
           method: 'get',
           headers: { 'Content-Type': 'application/json' },
         })
@@ -64,7 +64,7 @@ export default function Brand() {
         try {
           setLoading(true)
           const response = await axios({
-            url: 'https://brand-b-1.onrender.com/download-excel', // Replace with your backend URL
+            url: 'http://localhost:10000/download-excel', // Replace with your backend URL
             method: 'GET',
             responseType: 'blob', // Important to get the response as a blob (binary data)
           });
@@ -94,7 +94,7 @@ export default function Brand() {
         const formData = new FormData();
         formData.append('file', file);
         try {
-          const response = await axios.post('https://brand-b-1.onrender.com/upload', formData, {
+          const response = await axios.post('http://localhost:10000/upload', formData, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }
@@ -111,7 +111,7 @@ export default function Brand() {
         try {
           setLoading(true);
           const response = await axios({
-            url: 'https://brand-b-1.onrender.com/downloadfinalSheet', // Replace with your backend URL
+            url: 'http://localhost:10000/downloadfinalSheet', // Replace with your backend URL
             method: 'GET',
             responseType: 'blob', // Important to get the response as a blob (binary data)
           });

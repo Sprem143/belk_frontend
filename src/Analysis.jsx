@@ -62,7 +62,7 @@ export default function Analysis() {
 
   const getdata = async () => {
     setLoading(true)
-    let data = await fetch('https://brand-b-1.onrender.com/analysis/getdata', {
+    let data = await fetch('http://localhost:10000/analysis/getdata', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     })
@@ -245,11 +245,11 @@ export default function Analysis() {
   <div className="me-4">Old Price : <span style={{color:'#1bb353'}}>Red</span> <span style={{height:'15px', backgroundColor:'#1bb353'}}>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> </div>
   <p className="me-4">Price Increased : {iprice} 
     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="red" className="ms-2 bi bi-graph-up-arrow" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
+  <path fillRule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"/>
 </svg></p>
   <p className="me-4">Price Decreased : {dprice}
      <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="#1bb353" className="ms-2 bi bi-graph-down-arrow" viewBox="0 0 16 16">
-  <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 11.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-1 0v2.6l-3.613-4.417a.5.5 0 0 0-.74-.037L7.06 8.233 3.404 3.206a.5.5 0 0 0-.808.588l4 5.5a.5.5 0 0 0 .758.06l2.609-2.61L13.445 11H10.5a.5.5 0 0 0-.5.5"/>
+  <path fillRule="evenodd" d="M0 0h1v15h15v1H0zm10 11.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-1 0v2.6l-3.613-4.417a.5.5 0 0 0-.74-.037L7.06 8.233 3.404 3.206a.5.5 0 0 0-.808.588l4 5.5a.5.5 0 0 0 .758.06l2.609-2.61L13.445 11H10.5a.5.5 0 0 0-.5.5"/>
 </svg></p>
   <p className="me-4">Out of stock(less than 10) : {oos} 
     <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" className="ms-2 bi bi-cart-x-fill" viewBox="0 0 16 16">

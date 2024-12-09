@@ -4,7 +4,6 @@ import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Spinner from 'react-bootstrap/Spinner';
 import Accordion from 'react-bootstrap/Accordion';
-import Button from 'react-bootstrap/Button';
 import { CircularProgressbar } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Link, Outlet } from 'react-router-dom';
@@ -20,24 +19,8 @@ function App() {
   const [loading7, setLoading7] = useState(false);
   const [loading8, setLoading8] = useState(false);
   const [errorloading, seterrorLoading] = useState(false);
-  const [links1, setLinks1] = useState([]);
-  const [links2, setLinks2] = useState([]);
-  const [links3, setLinks3] = useState([]);
-  const [links4, setLinks4] = useState([]);
-  const [links5, setLinks5] = useState([]);
-  const [links6, setLinks6] = useState([]);
-  const [links7, setLinks7] = useState([]);
-  const [links8, setLinks8] = useState([]);
+  const [link,setLink]=useState([[],[],[],[],[],[],[],[]])
   const [errorlinks, seterrorLinks] = useState([]);
-  const [customIndex, setCustomIndex] = useState(0);
-  const [customIndex2, setCustomIndex2] = useState(0);
-  const [customIndex3, setCustomIndex3] = useState(0);
-  const [customIndex4, setCustomIndex4] = useState(0);
-  const [customIndex5, setCustomIndex5] = useState(0);
-  const [customIndex6, setCustomIndex6] = useState(0);
-  const [customIndex7, setCustomIndex7] = useState(0);
-  const [customIndex8, setCustomIndex8] = useState(0);
-  const [errorcustomIndex, seterrorCustomIndex] = useState(0);
 
   const [index1, setIndex1] = useState(0);
   const [index2, setIndex2] = useState(0);
@@ -73,10 +56,10 @@ function App() {
   const stopRef = useRef(false);
   const timerRef = useRef(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [linkid, setLinkid]= useState('');
 
   useEffect(() => {
     getinvurl();
-    getserialnumber();
     getupdatedproduct();
     geterrorurl();
     window.addEventListener("beforeunload", handleBeforeUnload);
@@ -84,6 +67,35 @@ function App() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
+
+  function divideArrayIntoParts(array) {
+    const totalParts = 8;
+    const partSize = Math.ceil(array.length / totalParts); // Calculate size of each part
+    const result = [];
+
+    for (let i = 0; i < totalParts; i++) {
+        const start = i * partSize;
+        const end = start + partSize;
+        result.push(array.slice(start, end)); // Slice array into parts
+    }
+
+    return result;
+}
+const getinvurl = async () => {
+  try {
+    let result = await fetch('http://localhost:10000/getinvurl', {
+      method: "GET",
+      headers: { 'Content-Type': 'application/json' }
+    })
+    result = await result.json();
+    setLinkid(result._id)
+    let dividedarr=divideArrayIntoParts(result.url);
+    setLink(dividedarr)
+    console.log(dividedarr);
+  } catch (err) {
+    console.log(err)
+  }
+};
 
   const categorizePriceRanges = (products) => {
     const ranges = [
@@ -135,50 +147,10 @@ function App() {
     const seconds = (time % 60).toFixed(0);
     return `${minutes} m ${seconds} s`;
   };
-  const getserialnumber = async () => {
-    let result = await fetch('https://brand-b-1.onrender.com/getserialnumber', {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    result = await result.json();
-    setIndex1(result.start_index1);
-    setIndex2(result.start_index2);
-    setIndex3(result.start_index3);
-    setIndex4(result.start_index4);
-    setIndex5(result.start_index5);
-    setIndex6(result.start_index6);
-    setIndex7(result.start_index7);
-    setIndex8(result.start_index8);
-    seterrorIndex(result.start_error_index);
-    setElapsedTime(result.time);
-
-  }
-
-
-  const getinvurl = async () => {
-    try {
-      let result = await fetch('https://brand-b-1.onrender.com/getinvurl', {
-        method: "GET",
-        headers: { 'Content-Type': 'application/json' }
-      })
-      result = await result.json();
-      setLinks1(result.links1[0].url);
-      setLinks2(result.links2[0].url);
-      setLinks3(result.links3[0].url);
-      setLinks4(result.links4[0].url);
-      setLinks5(result.links5[0].url);
-      setLinks6(result.links6[0].url);
-      setLinks7(result.links7[0].url);
-      setLinks8(result.links8[0].url);
-
-      // setNoOfTotalPr(result.notp)
-    } catch (err) {
-      console.log(err)
-    }
-  };
+ 
   const geterrorurl = async () => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/geterrorurl', {
+      let result = await fetch('http://localhost:10000/geterrorurl', {
         method: "GET",
         headers: { 'Content-Type': 'application/json' }
       })
@@ -195,10 +167,36 @@ function App() {
 
   const uploadinventoryfile = async () => {
     setLoading(true)
+    if(!invfile){
+      alert("Please select file first");
+      setLoading(false)
+      return;
+    }
     const formData = new FormData();
     formData.append('file', invfile);
     try {
-      const response = await axios.post('https://brand-b-1.onrender.com/uploadinvfile', formData, {
+      const response = await axios.post('http://localhost:10000/uploadinvfile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      alert(response.data.msg);
+      window.location.reload();
+      setLoading(false)
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      setLoading(false)
+      alert(error);
+    }
+  };
+
+  const uploadinventoryfile2 = async () => {
+    setLoading(true)
+    const formData = new FormData();
+    formData.append('file', invfile);
+    try {
+      const response = await axios.post('http://localhost:10000/uploadinvfile2', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -214,20 +212,18 @@ function App() {
     }
   };
   const settime = (time) => {
-    fetch('https://brand-b-1.onrender.com/settime', {
+    fetch('http://localhost:10000/settime', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ time: time + elapsedTime })
     })
   }
-
-
-  const autofetchData = async (link) => {
+  const autofetchData = async (link,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/autofetchdata', {
+      let result = await fetch('http://localhost:10000/autofetchdata', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -237,12 +233,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData2 = async (link) => {
+  const autofetchData2 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata2', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata2', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -251,12 +247,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData3 = async (link) => {
+  const autofetchData3 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata3', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata3', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -265,12 +261,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData4 = async (link) => {
+  const autofetchData4 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata4', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata4', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -279,12 +275,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData5 = async (link) => {
+  const autofetchData5 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata5', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata5', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -293,12 +289,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData6 = async (link) => {
+  const autofetchData6 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata6', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata6', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -307,12 +303,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData7 = async (link) => {
+  const autofetchData7 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata7', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata7', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -321,12 +317,12 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchData8 = async (link) => {
+  const autofetchData8 = async (link ,isfirst) => {
     try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/autofetchdata8', {
+      let result = await fetch('http://localhost:10000/inv/autofetchdata8', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
+        body: JSON.stringify({ link: link,id:linkid, isfirst:isfirst })
       });
       result = await result.json();
       return result
@@ -335,96 +331,6 @@ function App() {
       return false; // Return false in case of error to prevent further execution
     }
   };
-  const autofetchDataerror = async (link) => {
-    try {
-      let result = await fetch('https://brand-b-1.onrender.com/inv/errorautofetchdata', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ link: link })
-      });
-      result = await result.json();
-      return result
-    } catch (err) {
-      setErrurlerr(true);
-      console.log("Error in autofetchData:", err);
-      return false; // Return false in case of error to prevent further execution
-    }
-  };
-  const setautoindex1 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex2 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex2', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex3 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex3', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex4 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex4', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex5 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex5', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex6 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex6', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-  const setautoindex7 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex7', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-
-  const setautoindex8 = async (index) => {
-    const newIndex = parseInt(index, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/setindex8', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-
-  const setautoerrorindex = async (index) => {
-    const newIndex = parseInt(errorcustomIndex, 10);
-    let result = await fetch('https://brand-b-1.onrender.com/seterrorindex', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ start_index: newIndex })
-    });
-  }
-
   const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
   const autofetch = async () => {
@@ -432,10 +338,15 @@ function App() {
     setLoading1(true);
     startTimer();
     stopRef.current = false;
-    while (index < links1.length && !stopRef.current) {
+    while (index < link[0].length && !stopRef.current) {
       try {
         const startTime = performance.now();
-        const result = await autofetchData(links1[index]);
+        var result;
+      if(index==0){
+          result = await autofetchData(link[0][index],true);
+        }else{
+          result = await autofetchData(link[0][index],false);
+        }
         const endTime = performance.now();
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed1(timeTaken1.toFixed(1));
@@ -443,14 +354,13 @@ function App() {
         if (result === true) {
           index += 1;
           setIndex1(index)
-          index % 10 == 0 || index == links1.length ? setautoindex1(index) : null;
           setUrlError1(false)
         } else {
           setUrlError1(true);
           console.log("An error occurred.");
-          await delay(3000);
-          geterrorurl();
           index += 1;
+          setIndex1(index)
+          geterrorurl();
         }
       } catch (err) {
         console.log("Error in autofetch:", err);
@@ -463,25 +373,29 @@ function App() {
     let index = index2;
     setLoading2(true);
     stopRef.current = false;
-    while (index < links2.length && !stopRef.current) {
+    while (index < link[1].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData2(links2[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData2(link[1][index],true);
+          }else{
+            result = await autofetchData2(link[1][index],false);
+          }
+         const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed2(timeTaken1.toFixed(1));
         console.log(`Thread-II || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex2(index)
-          index % 10 == 0 || index == links2.length ? setautoindex2(index) : null;
           setUrlError2(false)
         } else {
           setUrlError2(true);
           console.log("An error occurred.");
-          await delay(3000);
-          geterrorurl();
           index += 1;
+          setIndex2(index)
+          geterrorurl();
         }
       } catch (err) {
         console.log("Error in autofetch:", err);
@@ -492,24 +406,27 @@ function App() {
     let index = index3;
     setLoading3(true);
     stopRef.current = false;
-    while (index < links3.length && !stopRef.current) {
+    while (index < link[2].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData3(links3[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData3(link[2][index],true);
+          }else{
+            result = await autofetchData3(link[2][index],false);
+          }        const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed3(timeTaken1.toFixed(1));
         console.log(`Thread-III || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex3(index)
-          index % 10 == 0 || index == links3.length ? setautoindex3(index) : null;
           setUrlError3(false)
         } else {
           setUrlError3(true);
           console.log("An error occurred.");
-          await delay(3000);
           index += 1;
+          setIndex3(index)
           geterrorurl();
         }
       } catch (err) {
@@ -521,24 +438,27 @@ function App() {
     let index = index4;
     setLoading4(true);
     stopRef.current = false;
-    while (index < links4.length && !stopRef.current) {
+    while (index < link[3].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData4(links4[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData4(link[3][index],true);
+          }else{
+            result = await autofetchData4(link[3][index],false);
+          }        const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed4(timeTaken1.toFixed(1));
         console.log(`Thread-IV || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex4(index)
-          index % 10 == 0 || index == links4.length ? setautoindex4(index) : null;
           setUrlError4(false)
         } else {
           setUrlError4(true);
           console.log("An error occurred.");
-          await delay(3000);
           index += 1;
+          setIndex4(index)
           geterrorurl();
         }
       } catch (err) {
@@ -550,24 +470,27 @@ function App() {
     let index = index5;
     setLoading5(true);
     stopRef.current = false;
-    while (index < links5.length && !stopRef.current) {
+    while (index < link[4].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData5(links5[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData5(link[4][index],true);
+          }else{
+            result = await autofetchData5(link[4][index],false);
+          }        const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed5(timeTaken1.toFixed(1));
         console.log(`Thread-V || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex5(index)
-          index % 10 == 0 || index == links5.length ? setautoindex5(index) : null;
           setUrlError5(false)
         } else {
           setUrlError5(true);
           console.log("An error occurred.");
-          await delay(3000);
           index += 1;
+          setIndex5(index)
           geterrorurl();
         }
       } catch (err) {
@@ -580,23 +503,26 @@ function App() {
     let index = index6;
     setLoading6(true);
     stopRef.current = false;
-    while (index < links6.length && !stopRef.current) {
+    while (index < link[5].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData6(links6[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData6(link[5][index],true);
+          }else{
+            result = await autofetchData6(link[5][index],false);
+          }         const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed6(timeTaken1.toFixed(1));
         console.log(`Thread-VI || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex6(index)
-          index % 10 == 0 || index == links6.length ? setautoindex6(index) : null; setUrlError6(false)
         } else {
           setUrlError6(true);
           console.log("An error occurred.");
-          await delay(3000);
           index += 1;
+          setIndex6(index)
           geterrorurl();
         }
       } catch (err) {
@@ -609,25 +535,28 @@ function App() {
     setLoading7(true);
     stopRef.current = false;
     stopRef.current = false;
-    while (index < links7.length && !stopRef.current) {
+    while (index < link[6].length && !stopRef.current) {
       try {
         const startTime = performance.now();
-        const result = await autofetchData7(links7[index]);
-        const endTime = performance.now();
+        var result;
+        if(index==0){
+            result = await autofetchData7(link[6][index],true);
+          }else{
+            result = await autofetchData7(link[6][index],false);
+          }         const endTime = performance.now();
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed7(timeTaken1.toFixed(1));
         console.log(`Thread-VII || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex7(index)
-          index % 10 == 0 || index == links7.length ? setautoindex7(index) : null;
           setUrlError7(false)
         } else {
           setUrlError7(true);
           console.log("An error occurred.");
-          await delay(3000);
-          geterrorurl();
           index += 1;
+          setIndex7(index)
+          geterrorurl();
         }
       } catch (err) {
         console.log("Error in autofetch7:", err);
@@ -638,82 +567,42 @@ function App() {
     let index = index8;
     setLoading8(true);
     stopRef.current = false;
-    while (index < links8.length && !stopRef.current) {
+    while (index < link[7].length && !stopRef.current) {
       try {
         const startTime = performance.now(); // Start the timer
-        const result = await autofetchData8(links8[index]);
-        const endTime = performance.now(); // End the timer
+        var result;
+        if(index==0){
+            result = await autofetchData8(link[7][index],true);
+          }else{
+            result = await autofetchData8(link[7][index],false);
+          }         const endTime = performance.now(); // End the timer
         const timeTaken1 = (endTime - startTime) / 1000;
         setSpeed8(timeTaken1.toFixed(1));
         console.log(`Thread-VIII || index: ${index} || result ${result}`);
         if (result === true) {
           index += 1;
           setIndex8(index)
-          index % 10 == 0 || index == links8.length ? setautoindex8(index) : null;
           setUrlError8(false)
         } else {
           setUrlError8(true);
           console.log("An error occurred.");
-          await delay(3000);
-          geterrorurl();
           index += 1;
+          setIndex8(index)
+          geterrorurl();
         }
       } catch (err) {
         console.log("Error in autofetch8:", err);
       }
     } setLoading8(false)
   };
-  const autofetcherror = async () => {
-    let index = errorindex;
-    alert(errorlinks[index])
-    seterrorLoading(true);
-    startTimer();
-    stopRef.current = false;
-    while (index < errorlinks.length && !stopRef.current) {
-      try {
-        const startTime = performance.now(); // Start the timer
-        const result = await autofetchDataerror(errorlinks[index]);
-        const endTime = performance.now(); // End the timer
-        const timeTaken1 = (endTime - startTime) / 1000;
-        setSpeederror(timeTaken1.toFixed(1));
-        console.log(`Thread-Error || error_index: ${errorindex} || result ${result}`);
-        if (result === true) {
-          let rindex = errorlinks.indexOf(errorlinks[index]);
-          if (rindex !== -1) {
-            errorlinks.splice(rindex, 1);
-          }
-          index += 1;
-          seterrorIndex(index)
-          setErrurlerr(false)
-        } else {
-          setErrurlerr(true);
-          console.log("An error occurred.");
-          await delay(5000);
-          index += 1;
-        }
-      } catch (err) {
-        console.log("Error in autofetch:", err);
-      }
-    }
-    seterrorLoading(false);
-    stopTimer();
-  };
+
   const stopFetching = () => {
-    loading1 ? setautoindex1(index1 + 1) : null
-    loading2 ? setautoindex2(index2 + 1) : null
-    loading3 ? setautoindex3(index3 + 1) : null
-    loading4 ? setautoindex4(index4 + 1) : null
-    loading5 ? setautoindex5(index5 + 1) : null
-    loading6 ? setautoindex6(index6 + 1) : null
-    loading7 ? setautoindex7(index7 + 1) : null
-    loading8 ? setautoindex8(index8 + 1) : null
-    errorloading ? setautoerrorindex(errorindex+1):null
     stopRef.current = true; // Set stop condition
   };
 
   const getupdatedproduct = async () => {
 
-    let result = await fetch('https://brand-b-1.onrender.com/getupdatedproduct', {
+    let result = await fetch('http://localhost:10000/getupdatedproduct', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -725,7 +614,7 @@ function App() {
     try {
       setLoading(true)
       const response = await axios({
-        url: 'https://brand-b-1.onrender.com/download-inventory',
+        url: 'http://localhost:10000/download-inventory',
         method: 'GET',
         responseType: 'blob',
       });
@@ -768,6 +657,14 @@ function App() {
       )}
       <div>
         <h2>Inventory Updation</h2>
+        {/* -----Manual inventory updatiuon----------- */}
+
+        <div className='pb-2 mt-4' style={{ border:'1px solid black'}}>
+          <h4>Upload direct source file</h4>
+          <input type="file" onChange={setInventoryfile} accept=".xlsx, .xls" />
+          <button onClick={uploadinventoryfile2} >Upload</button>
+        </div>
+        {/* --------Inventory updation */}
         <div>
           <input type="file" onChange={setInventoryfile} accept=".xlsx, .xls" />
           <button onClick={uploadinventoryfile} >Upload</button>
@@ -785,36 +682,33 @@ function App() {
       <div className="timer_container mt-4">
         <div className='timer'>Elapsed Time : &nbsp;<span style={{ fontWeight: 'bolder' }}>{formatElapsedTime(elapsedTime)}</span></div>
         {
-          (loading1 || loading2 || loading3 || loading4 || loading5 || loading6 || loading7 || loading8) && <div className='timer'>Expected Time :&nbsp;<span style={{ fontWeight: 'bolder' }}>{formatElapsedTime1((speed1 / 8) * (links1.length + links2.length + links3.length + links4.length + links5.length + links6.length + links7.length + links8.length - (index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8)))}</span> </div>
+          (loading1 || loading2 || loading3 || loading4 || loading5 || loading6 || loading7 || loading8) && <div className='timer'>Expected Time :&nbsp;<span style={{ fontWeight: 'bolder' }}>{formatElapsedTime1((speed1 / 8) * (link[0].length + link[1].length + link[2].length + link[3].length + link[4].length + link[5].length + link[6].length + link[7].length - (index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8)))}</span> </div>
         }
         <div className="timer">
           Total updated Product : {totalProduct} <span onClick={getupdatedproduct}><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="ms-4 bi bi-arrow-clockwise" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
+            <path fillRule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z" />
             <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466" />
           </svg></span>
         </div>
       </div>
       <Accordion className='mt-4' defaultActiveKey="0">
         <Accordion.Item eventKey="0">
-          <Accordion.Header>Total Number of Product's URL: {links1 ? links1.length + links2.length + links3.length + links4.length + links5.length + links6.length + links7.length + links8.length : 0} &nbsp;&nbsp; || &nbsp;&nbsp; Total Number of urls fetched : {index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8} &nbsp;&nbsp; || &nbsp;&nbsp; Remaining urls :  {links1 ? links1.length + links2.length + links3.length + links4.length + links5.length + links6.length + links7.length + links8.length - (index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8) : 0} &nbsp;&nbsp; || &nbsp;&nbsp; Net Speed : &nbsp; <span style={{ color: 'red' }}> {(speed1 / 8).toFixed(1)} s / URL</span></Accordion.Header>
+          <Accordion.Header>Total Number of Product's URL: {link[0] ? link[0].length + link[1].length + link[2].length + link[3].length + link[4].length + link[5].length + link[6].length + link[7].length : 0} &nbsp;&nbsp; || &nbsp;&nbsp; Total Number of urls fetched : {index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8} &nbsp;&nbsp; || &nbsp;&nbsp; Remaining urls :  {link[0] ? link[0].length + link[1].length + link[2].length + link[3].length + link[4].length + link[5].length + link[6].length + link[7].length - (index1 + index2 + index3 + index4 + index5 + index6 + index7 + index8) : 0} &nbsp;&nbsp; || &nbsp;&nbsp; Net Speed : &nbsp; <span style={{ color: 'red' }}> {(speed1 / 8).toFixed(1)} s / URL</span></Accordion.Header>
           <Accordion.Body>
             <div className="thread" style={{ backgroundColor: loading1 ? 'rgb(11 109 91 / 99%)' : 'black', boxShadow: loading1 ? '#000000 8px 3px 55px -17px' : '0' }}>
               <div className="container">
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch}>Start-I</button>
-                    <input className='inputbtn' type="number" placeholder={index1} onChange={(e) => setCustomIndex(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex1(customIndex)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index1} onChange={(e) => setIndex(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index1}/{links1.length}</h4>
+                    <h4> {index1}/{link[0].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index1 / links1.length * 100)}
-                        text={`${(index1 / links1.length * 100).toFixed(0)}%`}
+                        value={(index1 / link[0].length * 100)}
+                        text={`${(index1 / link[0].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -824,7 +718,12 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError1 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links1[index1]} target='_blank' style={{ color: urlError1 ? 'red' : 'white' }}>{index1 === links1.length ? "Completed" : links1[index1]}</a>
+                    <a href={link[0][index1]} target='_blank' style={{ color: urlError1 ? 'red' : 'white' }}>{index1 === link[0].length ? 
+                    (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[0][index1]}</a>
                   </div>
 
                 </div>
@@ -836,18 +735,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch2}>Start-II</button>
-                    <input className='inputbtn' type="number" placeholder={index2} onChange={(e) => setCustomIndex2(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex2(customIndex2)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index2} onChange={(e) => setIndex2(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index2}/{links2.length}</h4>
+                    <h4> {index2}/{link[1].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index2 / links2.length * 100)}
-                        text={`${(index2 / links2.length * 100).toFixed(0)}%`}
+                        value={(index2 / link[1].length * 100)}
+                        text={`${(index2 / link[1].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -857,7 +753,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError2 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links2[index2]} target='_blank' style={{ color: urlError2 ? 'red' : 'white' }}>{index2 === links2.length ? "Completed" : links2[index2]}</a>
+                    <a href={link[1][index2]} target='_blank' style={{ color: urlError2 ? 'red' : 'white' }}>{index2 === link[1].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[1][index2]}</a>
                   </div>
 
                 </div>
@@ -869,18 +769,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch3}>Start-III</button>
-                    <input className='inputbtn' type="number" placeholder={index3} onChange={(e) => setCustomIndex3(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex3(customIndex3)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index3} onChange={(e) => setIndex3(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index3}/{links3.length}</h4>
+                    <h4> {index3}/{link[2].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index3 / links3.length * 100)}
-                        text={`${(index3 / links3.length * 100).toFixed(0)}%`}
+                        value={(index3 / link[2].length * 100)}
+                        text={`${(index3 / link[2].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -890,7 +787,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError3 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links3[index3]} target='_blank' style={{ color: urlError3 ? 'red' : 'white' }}>{index3 === links3.length ? "Completed" : links3[index3]}</a>
+                    <a href={link[2][index3]} target='_blank' style={{ color: urlError3 ? 'red' : 'white' }}>{index3 === link[2].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[2][index3]}</a>
                   </div>
 
                 </div>
@@ -902,18 +803,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch4}>Start-IV</button>
-                    <input className='inputbtn' type="number" placeholder={index4} onChange={(e) => setCustomIndex4(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex4(customIndex4)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index4} onChange={(e) => setIndex4(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index4}/{links4.length}</h4>
+                    <h4> {index4}/{link[3].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index4 / links4.length * 100)}
-                        text={`${(index4 / links4.length * 100).toFixed(0)}%`}
+                        value={(index4 / link[3].length * 100)}
+                        text={`${(index4 / link[3].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -923,7 +821,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError4 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links4[index4]} target='_blank' style={{ color: urlError4 ? 'red' : 'white' }}>{index4 === links4.length ? "Completed" : links4[index4]}</a>
+                    <a href={link[3][index4]} target='_blank' style={{ color: urlError4 ? 'red' : 'white' }}>{index4 === link[3].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[3][index4]}</a>
                   </div>
 
                 </div>
@@ -935,18 +837,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch5}>Start-V</button>
-                    <input className='inputbtn' type="number" placeholder={index5} onChange={(e) => setCustomIndex5(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex5(customIndex5)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index5} onChange={(e) => setIndex5(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index5}/{links5.length}</h4>
+                    <h4> {index5}/{link[4].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index5 / links5.length * 100)}
-                        text={`${(index5 / links5.length * 100).toFixed(0)}%`}
+                        value={(index5 / link[4].length * 100)}
+                        text={`${(index5 / link[4].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -956,7 +855,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError5 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links5[index5]} target='_blank' style={{ color: urlError5 ? 'red' : 'white' }}>{index5 === links5.length ? "Completed" : links5[index5]}</a>
+                    <a href={link[4][index5]} target='_blank' style={{ color: urlError5 ? 'red' : 'white' }}>{index5 === link[4].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[4][index5]}</a>
                   </div>
 
                 </div>
@@ -968,18 +871,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch6}>Start-VI</button>
-                    <input className='inputbtn' type="number" placeholder={index6} onChange={(e) => setCustomIndex6(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex6(customIndex6)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index6} onChange={(e) => setIndex6(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index6}/{links6.length}</h4>
+                    <h4> {index6}/{link[5].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index6 / links6.length * 100)}
-                        text={`${(index6 / links6.length * 100).toFixed(0)}%`}
+                        value={(index6 / link[5].length * 100)}
+                        text={`${(index6 / link[5].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -989,7 +889,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError6 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links6[index6]} target='_blank' style={{ color: urlError6 ? 'red' : 'white' }}>{index6 === links6.length ? "Completed" : links6[index6]}</a>
+                    <a href={link[5][index6]} target='_blank' style={{ color: urlError6 ? 'red' : 'white' }}>{index6 === link[5].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[5][index6]}</a>
                   </div>
                 </div>
               </div>
@@ -1000,18 +904,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch7}>Start-VII</button>
-                    <input className='inputbtn' type="number" placeholder={index7} onChange={(e) => setCustomIndex7(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex7(customIndex7)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index7} onChange={(e) => setIndex7(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index7}/{links7.length}</h4>
+                    <h4> {index7}/{link[6].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index7 / links7.length * 100)}
-                        text={`${(index7 / links7.length * 100).toFixed(0)}%`}
+                        value={(index7 / link[6].length * 100)}
+                        text={`${(index7 / link[6].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -1021,7 +922,11 @@ function App() {
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
                     {urlError7 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links7[index7]} target='_blank' style={{ color: urlError7 ? 'red' : 'white' }}>{index7 === links7.length ? "Completed" : links7[index7]}</a>
+                    <a href={link[6][index7]} target='_blank' style={{ color: urlError7 ? 'red' : 'white' }}>{index7 === link[6].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[6][index7]}</a>
                   </div>
                 </div>
               </div>
@@ -1032,18 +937,15 @@ function App() {
                 <div className="row">
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                     <button className='startbtn me-3' onClick={autofetch8}>Start-VIII</button>
-                    <input className='inputbtn' type="number" placeholder={index8} onChange={(e) => setCustomIndex8(e.target.value)} />
-                    <button className='startbtn ms-3' onClick={() => setautoindex8(customIndex8)} >
-                      Set Index
-                    </button>
+                    <input className='inputbtn' type="number" placeholder={index8} onChange={(e) => setIndex8(e.target.value)} />
                   </div>
 
                   <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
-                    <h4> {index8}/{links8.length}</h4>
+                    <h4> {index8}/{link[7].length}</h4>
                     <div className='ms-4 me-4' style={{ height: 50, width: 50 }}>
                       <CircularProgressbar
-                        value={(index8 / links8.length * 100)}
-                        text={`${(index8 / links8.length * 100).toFixed(0)}%`}
+                        value={(index8 / link[7].length * 100)}
+                        text={`${(index8 / link[7].length * 100).toFixed(0)}%`}
                       />;
                     </div>
                     <h4>
@@ -1052,8 +954,12 @@ function App() {
                   </div>
 
                   <div className="cus_row col-lg-6 col-md-6 col-sm-12 mt-2 mb-2">
-                    {urlError8 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
-                    <a href={links8[index8]} target='_blank' style={{ color: urlError8 ? 'red' : 'white' }}>{index8 === links8.length ? "Completed" : links8[index8]}</a>
+                    {urlError8 && link[7].length < index8 && <p style={{ color: 'red' }}>Error while fetching this url -</p>}
+                    <a href={link[7][index8]} target='_blank' style={{ color: (urlError8 && link[7].length < index8) ? 'red' : 'white' }}>{index8 === link[7].length ?  (
+                      <>
+                        Completed <img className='ms-3' src="/static/celebr.png" alt="Completed" height='40' style={{transform: 'rotate(70deg)'}} />
+                      </>
+                    ) : link[7][index8]}</a>
                   </div>
                 </div>
               </div>
@@ -1072,7 +978,7 @@ function App() {
                     <div className="cus_row col-lg-3 col-md-6 col-sm-12 mt-2 mb-2">
                       <button className='startbtn me-3' onClick={autofetcherror}>Start</button>
                       <input className='inputbtn' type="number" placeholder={errorindex} onChange={(e) => seterrorCustomIndex(e.target.value)} />
-                      <button className='startbtn ms-3' onClick={()=>setautoerrorindex(errorcustomIndex)} >
+                      <button className='startbtn ms-3' onClick={() => setautoerrorindex(errorcustomIndex)} >
                         Set Index
                       </button>
                     </div>
